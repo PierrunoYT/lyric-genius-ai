@@ -4,6 +4,7 @@ import axios from 'axios';
 import cors from 'cors';
 import path from 'path';
 import config from './config';
+import * as cheerio from 'cheerio';
 
 const app = express();
 app.use(express.json());
@@ -34,10 +35,43 @@ async function getSongDetails(songId: number) {
     const response = await axios.get(`${GENIUS_API_BASE_URL}/songs/${songId}`, {
       headers: { 'Authorization': `Bearer ${GENIUS_ACCESS_TOKEN}` }
     });
-    return response.data.response.song;
+    const song = response.data.response.song;
+    const lyrics = await scrapeLyrics(song.url);
+    return { ...song, lyrics };
   } catch (error) {
     console.error('Error getting song details:', error);
     throw error;
+  }
+}
+
+async function scrapeLyrics(url: string) {
+  try {
+    console.log('Scraping lyrics from URL:', url);
+    const response = await axios.get(url);
+    console.log('Response received, status:', response.status);
+    
+    if (!response.data) {
+      console.error('No data received from the URL');
+      return 'Lyrics not available';
+    }
+
+    const $ = cheerio.load(response.data);
+    console.log('Cheerio loaded successfully');
+
+    // Try different selectors
+    let lyrics = $('[data-lyrics-container="true"]').text().trim();
+    if (!lyrics) {
+      lyrics = $('.lyrics').text().trim();
+    }
+    if (!lyrics) {
+      lyrics = $('div[class*="Lyrics__Root"]').text().trim();
+    }
+
+    console.log('Lyrics found:', lyrics ? 'Yes' : 'No');
+    return lyrics || 'Lyrics not available';
+  } catch (error) {
+    console.error('Error scraping lyrics:', error);
+    return 'Error fetching lyrics';
   }
 }
 
@@ -91,8 +125,21 @@ app.post('/api/chat', async (req: Request, res: Response) => {
       }
     );
 
-    const reply = response.data.choices[0].message.content[0].text.trim();
-    res.json({ reply });
+    if (response.data && response.data.choices && response.data.choices.length > 0) {
+      const choice = response.data.choices[0];
+      if (choice.message && choice.message.content && choice.message.content.length > 0) {
+        const reply = choice.message.content[0].text;
+        if (typeof reply === 'string') {
+          res.json({ reply: reply.trim() });
+        } else {
+          throw new Error('Unexpected reply format');
+        }
+      } else {
+        throw new Error('No content in the response');
+      }
+    } else {
+      throw new Error('Invalid response structure');
+    }
   } catch (error) {
     console.error('Error in chat interaction:', error);
     res.status(500).json({ error: 'An error occurred during the chat interaction' });
