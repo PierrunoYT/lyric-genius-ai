@@ -77,6 +77,19 @@
             border: 1px solid var(--border-color);
             border-radius: 4px;
             margin-top: 10px;
+            line-height: 1.8;
+            font-size: 14px;
+        }
+        .lyrics-section {
+            margin-bottom: 20px;
+        }
+        .lyrics-section-title {
+            font-weight: bold;
+            color: var(--primary-color);
+            margin-bottom: 5px;
+        }
+        .lyrics-line {
+            margin-bottom: 5px;
         }
         .chat-message {
             margin-bottom: 10px;
@@ -172,8 +185,27 @@
                 <h3>${song.primary_artist.name}</h3>
                 <p>${song.description?.html || 'No description available'}</p>
                 <h4>Lyrics:</h4>
-                <div id="lyrics">${song.lyrics}</div>
+                <div id="lyrics">${formatLyrics(song.lyrics)}</div>
             `;
+        }
+
+        function formatLyrics(lyrics) {
+            const sections = lyrics.split(/\[|\]/g);
+            let formattedLyrics = '';
+            for (let i = 0; i < sections.length; i++) {
+                if (i % 2 === 0) {
+                    // This is a lyrics section
+                    formattedLyrics += `<div class="lyrics-section">`;
+                    if (sections[i - 1]) {
+                        formattedLyrics += `<div class="lyrics-section-title">[${sections[i - 1]}]</div>`;
+                    }
+                    formattedLyrics += sections[i].split('\n').map(line => 
+                        `<div class="lyrics-line">${line}</div>`
+                    ).join('');
+                    formattedLyrics += `</div>`;
+                }
+            }
+            return formattedLyrics;
         }
 
         chatForm.addEventListener('submit', async (e) => {
