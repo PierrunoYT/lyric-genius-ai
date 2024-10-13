@@ -23,6 +23,7 @@ async function searchSong(query: string) {
       params: { q: query },
       headers: { 'Authorization': `Bearer ${GENIUS_ACCESS_TOKEN}` }
     });
+    console.log('Search API Response:', JSON.stringify(response.data, null, 2));
     return response.data.response.hits;
   } catch (error) {
     console.error('Error searching song:', error);
@@ -35,9 +36,14 @@ async function getSongDetails(songId: number) {
     const response = await axios.get(`${GENIUS_API_BASE_URL}/songs/${songId}`, {
       headers: { 'Authorization': `Bearer ${GENIUS_ACCESS_TOKEN}` }
     });
+    console.log('Song Details API Response:', JSON.stringify(response.data, null, 2));
     const song = response.data.response.song;
     const lyrics = await scrapeLyrics(song.url);
-    return { ...song, lyrics };
+    return { 
+      ...song, 
+      lyrics,
+      description: song.description?.plain || 'No description available'
+    };
   } catch (error) {
     console.error('Error getting song details:', error);
     throw error;
@@ -81,6 +87,7 @@ app.post('/api/search', async (req: Request, res: Response) => {
     const results = await searchSong(query);
     res.json(results);
   } catch (error) {
+    console.error('Error in /api/search:', error);
     res.status(500).json({ error: 'An error occurred while searching for songs' });
   }
 });
@@ -91,6 +98,7 @@ app.get('/api/song/:id', async (req: Request, res: Response) => {
     const songDetails = await getSongDetails(songId);
     res.json(songDetails);
   } catch (error) {
+    console.error('Error in /api/song/:id:', error);
     res.status(500).json({ error: 'An error occurred while fetching song details' });
   }
 });
