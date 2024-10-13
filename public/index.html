@@ -13,8 +13,8 @@
             max-width: 800px;
             margin: 0 auto;
         }
-        h1 {
-            text-align: center;
+        h1, h2, h3, h4 {
+            margin-top: 20px;
         }
         form {
             display: flex;
@@ -29,7 +29,6 @@
             margin-top: 20px;
             border: 1px solid #ccc;
             padding: 10px;
-            white-space: pre-wrap;
         }
         #search-results div {
             cursor: pointer;
@@ -38,6 +37,14 @@
         }
         #search-results div:hover {
             background-color: #f0f0f0;
+        }
+        #lyrics {
+            white-space: pre-wrap;
+            font-family: monospace;
+            background-color: #f9f9f9;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
         }
     </style>
 </head>
@@ -109,9 +116,9 @@
             resultDiv.innerHTML = `
                 <h2>${song.title}</h2>
                 <h3>${song.primary_artist.name}</h3>
-                <p>${song.description.html}</p>
+                <p>${song.description?.html || 'No description available'}</p>
                 <h4>Lyrics:</h4>
-                <pre>${song.lyrics}</pre>
+                <div id="lyrics">${song.lyrics}</div>
             `;
         }
 
