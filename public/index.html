@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Lyrics AI App</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 0;
+            padding: 20px;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        h1 {
+            text-align: center;
+        }
+        form {
+            display: flex;
+            flex-direction: column;
+            margin-bottom: 20px;
+        }
+        input, button {
+            margin-bottom: 10px;
+            padding: 5px;
+        }
+        #result, #chat, #search-results {
+            margin-top: 20px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            white-space: pre-wrap;
+        }
+        #search-results div {
+            cursor: pointer;
+            padding: 5px;
+            border-bottom: 1px solid #eee;
+        }
+        #search-results div:hover {
+            background-color: #f0f0f0;
+        }
+    </style>
+</head>
+<body>
+    <h1>Lyrics AI App</h1>
+    <form id="search-form">
+        <input type="text" id="search-input" placeholder="Search for a song" required>
+        <button type="submit">Search</button>
+    </form>
+    <div id="search-results"></div>
+    <div id="result"></div>
+    <form id="chat-form">
+        <input type="text" id="chat-input" placeholder="Ask about the lyrics..." required>
+        <button type="submit">Send</button>
+    </form>
+    <div id="chat"></div>
+
+    <script>
+        const searchForm = document.getElementById('search-form');
+        const chatForm = document.getElementById('chat-form');
+        const searchResultsDiv = document.getElementById('search-results');
+        const resultDiv = document.getElementById('result');
+        const chatDiv = document.getElementById('chat');
+        let currentLyrics = '';
+        let currentSummary = '';
+
+        searchForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const query = document.getElementById('search-input').value;
+            
+            try {
+                const response = await fetch('/api/search', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ query }),
+                });
+                const data = await response.json();
+                displaySearchResults(data);
+            } catch (error) {
+                searchResultsDiv.textContent = 'An error occurred while searching for songs.';
+            }
+        });
+
+        function displaySearchResults(results) {
+            searchResultsDiv.innerHTML = '';
+            results.forEach(result => {
+                const div = document.createElement('div');
+                div.textContent = `${result.result.title} by ${result.result.primary_artist.name}`;
+                div.onclick = () => fetchSongDetails(result.result.id);
+                searchResultsDiv.appendChild(div);
+            });
+        }
+
+        async function fetchSongDetails(songId) {
+            try {
+                const response = await fetch(`/api/song/${songId}`);
+                const data = await response.json();
+                displaySongDetails(data);
+            } catch (error) {
+                resultDiv.textContent = 'An error occurred while fetching song details.';
+            }
+        }
+
+        function displaySongDetails(song) {
+            currentLyrics = song.lyrics;
+            currentSummary = `${song.title} by ${song.primary_artist.name}`;
+            resultDiv.innerHTML = `
+                <h2>${song.title}</h2>
+                <h3>${song.primary_artist.name}</h3>
+                <p>${song.description.html}</p>
+                <h4>Lyrics:</h4>
+                <pre>${song.lyrics}</pre>
+            `;
+        }
+
+        chatForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const message = document.getElementById('chat-input').value;
+            const context = `Lyrics: ${currentLyrics}\n\nSummary: ${currentSummary}`;
+            
+            try {
+                const response = await fetch('/api/chat', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ message, context }),
+                });
+                const data = await response.json();
+                chatDiv.innerHTML += `<p><strong>You:</strong> ${message}</p><p><strong>AI:</strong> ${data.reply}</p>`;
+                document.getElementById('chat-input').value = '';
+            } catch (error) {
+                chatDiv.innerHTML += '<p>An error occurred during the chat interaction.</p>';
+            }
+        });
+    </script>
+</body>
+</html>

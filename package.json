@@ -1,17 +1,28 @@
 {
   "name": "lyrics-ai-app",
   "version": "1.0.0",
-  "main": "index.js",
+  "description": "An AI app that summarizes lyrics and allows chatting with them using TypeScript",
+  "main": "dist/index.js",
   "scripts": {
+    "start": "node dist/index.js",
+    "dev": "ts-node-dev --respawn --transpile-only src/index.ts",
+    "build": "tsc",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
+  "keywords": ["lyrics", "ai", "typescript"],
   "author": "",
   "license": "ISC",
-  "description": "",
   "dependencies": {
     "axios": "^1.7.7",
-    "cheerio": "^1.0.0",
-    "openai": "^4.67.3"
+    "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^4.17.21",
+    "@types/node": "^20.11.24",
+    "ts-node-dev": "^2.0.0",
+    "typescript": "^5.3.3"
   }
 }
