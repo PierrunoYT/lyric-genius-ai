@@ -21,8 +21,13 @@
             color: var(--text-color);
         }
         .container {
-            max-width: 800px;
+            max-width: 1200px;
             margin: 0 auto;
+            display: flex;
+            gap: 20px;
+        }
+        .column {
+            flex: 1;
             background-color: white;
             padding: 20px;
             border-radius: 8px;
@@ -53,12 +58,14 @@
         button:hover {
             background-color: #2980b9;
         }
-        #result, #chat, #search-results {
+        #search-results, #result, #chat {
             margin-top: 20px;
             border: 1px solid var(--border-color);
             padding: 15px;
             border-radius: 4px;
             background-color: white;
+            max-height: 400px;
+            overflow-y: auto;
         }
         #search-results div {
             cursor: pointer;
@@ -103,30 +110,35 @@
         .ai-message {
             background-color: #e3f2fd;
         }
-        @media (max-width: 600px) {
-            body {
-                padding: 10px;
-            }
+        @media (max-width: 768px) {
             .container {
-                padding: 10px;
+                flex-direction: column;
+            }
+            .column {
+                width: 100%;
             }
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Lyrics AI App</h1>
-        <form id="search-form">
-            <input type="text" id="search-input" placeholder="Search for a song" required>
-            <button type="submit">Search</button>
-        </form>
-        <div id="search-results"></div>
-        <div id="result"></div>
-        <form id="chat-form">
-            <input type="text" id="chat-input" placeholder="Ask about the lyrics..." required>
-            <button type="submit">Send</button>
-        </form>
-        <div id="chat"></div>
+        <div class="column">
+            <h1>Lyrics AI App</h1>
+            <form id="search-form">
+                <input type="text" id="search-input" placeholder="Search for a song" required>
+                <button type="submit">Search</button>
+            </form>
+            <div id="search-results"></div>
+            <div id="result"></div>
+        </div>
+        <div class="column">
+            <h2>Chat with AI</h2>
+            <div id="chat"></div>
+            <form id="chat-form">
+                <input type="text" id="chat-input" placeholder="Ask about the lyrics..." required>
+                <button type="submit">Send</button>
+            </form>
+        </div>
     </div>
 
     <script>
