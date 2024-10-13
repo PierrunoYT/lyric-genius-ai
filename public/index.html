@@ -5,16 +5,32 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Lyrics AI App</title>
     <style>
+        :root {
+            --primary-color: #3498db;
+            --secondary-color: #2ecc71;
+            --background-color: #f4f4f4;
+            --text-color: #333;
+            --border-color: #ddd;
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             line-height: 1.6;
             margin: 0;
             padding: 20px;
+            background-color: var(--background-color);
+            color: var(--text-color);
+        }
+        .container {
             max-width: 800px;
             margin: 0 auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
         }
         h1, h2, h3, h4 {
             margin-top: 20px;
+            color: var(--primary-color);
         }
         form {
             display: flex;
@@ -23,44 +39,82 @@
         }
         input, button {
             margin-bottom: 10px;
-            padding: 5px;
+            padding: 10px;
+            border: 1px solid var(--border-color);
+            border-radius: 4px;
+            font-size: 16px;
+        }
+        button {
+            background-color: var(--primary-color);
+            color: white;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
+        button:hover {
+            background-color: #2980b9;
         }
         #result, #chat, #search-results {
             margin-top: 20px;
-            border: 1px solid #ccc;
-            padding: 10px;
+            border: 1px solid var(--border-color);
+            padding: 15px;
+            border-radius: 4px;
+            background-color: white;
         }
         #search-results div {
             cursor: pointer;
-            padding: 5px;
-            border-bottom: 1px solid #eee;
+            padding: 10px;
+            border-bottom: 1px solid var(--border-color);
+            transition: background-color 0.3s ease;
         }
         #search-results div:hover {
             background-color: #f0f0f0;
         }
         #lyrics {
             white-space: pre-wrap;
-            font-family: monospace;
+            font-family: 'Courier New', Courier, monospace;
             background-color: #f9f9f9;
-            padding: 10px;
-            border: 1px solid #ddd;
+            padding: 15px;
+            border: 1px solid var(--border-color);
             border-radius: 4px;
+            margin-top: 10px;
+        }
+        .chat-message {
+            margin-bottom: 10px;
+            padding: 10px;
+            border-radius: 4px;
+        }
+        .user-message {
+            background-color: #e8f5e9;
+            text-align: right;
+        }
+        .ai-message {
+            background-color: #e3f2fd;
+        }
+        @media (max-width: 600px) {
+            body {
+                padding: 10px;
+            }
+            .container {
+                padding: 10px;
+            }
         }
     </style>
 </head>
 <body>
-    <h1>Lyrics AI App</h1>
-    <form id="search-form">
-        <input type="text" id="search-input" placeholder="Search for a song" required>
-        <button type="submit">Search</button>
-    </form>
-    <div id="search-results"></div>
-    <div id="result"></div>
-    <form id="chat-form">
-        <input type="text" id="chat-input" placeholder="Ask about the lyrics..." required>
-        <button type="submit">Send</button>
-    </form>
-    <div id="chat"></div>
+    <div class="container">
+        <h1>Lyrics AI App</h1>
+        <form id="search-form">
+            <input type="text" id="search-input" placeholder="Search for a song" required>
+            <button type="submit">Search</button>
+        </form>
+        <div id="search-results"></div>
+        <div id="result"></div>
+        <form id="chat-form">
+            <input type="text" id="chat-input" placeholder="Ask about the lyrics..." required>
+            <button type="submit">Send</button>
+        </form>
+        <div id="chat"></div>
+    </div>
 
     <script>
         const searchForm = document.getElementById('search-form');
@@ -91,7 +145,7 @@
         });
 
         function displaySearchResults(results) {
-            searchResultsDiv.innerHTML = '';
+            searchResultsDiv.innerHTML = '<h3>Search Results:</h3>';
             results.forEach(result => {
                 const div = document.createElement('div');
                 div.textContent = `${result.result.title} by ${result.result.primary_artist.name}`;
@@ -136,8 +190,12 @@
                     body: JSON.stringify({ message, context }),
                 });
                 const data = await response.json();
-                chatDiv.innerHTML += `<p><strong>You:</strong> ${message}</p><p><strong>AI:</strong> ${data.reply}</p>`;
+                chatDiv.innerHTML += `
+                    <div class="chat-message user-message"><strong>You:</strong> ${message}</div>
+                    <div class="chat-message ai-message"><strong>AI:</strong> ${data.reply}</div>
+                `;
                 document.getElementById('chat-input').value = '';
+                chatDiv.scrollTop = chatDiv.scrollHeight;
             } catch (error) {
                 chatDiv.innerHTML += '<p>An error occurred during the chat interaction.</p>';
             }
