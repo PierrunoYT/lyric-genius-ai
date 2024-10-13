@@ -78,25 +78,29 @@
         }
         #lyrics {
             white-space: pre-wrap;
-            font-family: 'Courier New', Courier, monospace;
-            background-color: #f9f9f9;
+            font-family: Arial, sans-serif;
+            background-color: #ffffff;
             padding: 15px;
             border: 1px solid var(--border-color);
             border-radius: 4px;
             margin-top: 10px;
-            line-height: 1.8;
-            font-size: 14px;
+            line-height: 1.4;
+            font-size: 16px;
         }
         .lyrics-section {
             margin-bottom: 20px;
         }
         .lyrics-section-title {
             font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 5px;
+            color: #000000;
+            margin-bottom: 10px;
+            font-size: 18px;
         }
         .lyrics-line {
             margin-bottom: 5px;
+        }
+        .lyrics-line.highlight {
+            background-color: #ffff00;
         }
         .chat-message {
             margin-bottom: 10px;
@@ -212,9 +216,15 @@
                         formattedLyrics += `<div class="lyrics-section-title">[${sections[i - 1]}]</div>`;
                     }
                     formattedLyrics += sections[i].split('\n').map(line => {
-                        // Add space after punctuation marks
-                        line = line.replace(/([.!?])(\S)/g, '$1 $2');
-                        return `<div class="lyrics-line">${line}</div>`;
+                        line = line.trim();
+                        if (line) {
+                            // Add space after punctuation marks if not followed by a space or closing parenthesis
+                            line = line.replace(/([.!?])(?![\s)])/g, '$1 ');
+                            // Check if the line should be highlighted (e.g., if it contains italicized text)
+                            const shouldHighlight = line.includes('*') || line.includes('_');
+                            return `<div class="lyrics-line${shouldHighlight ? ' highlight' : ''}">${line}</div>`;
+                        }
+                        return '';
                     }).join('');
                     formattedLyrics += `</div>`;
                 }
