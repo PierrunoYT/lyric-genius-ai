@@ -199,9 +199,11 @@
                     if (sections[i - 1]) {
                         formattedLyrics += `<div class="lyrics-section-title">[${sections[i - 1]}]</div>`;
                     }
-                    formattedLyrics += sections[i].split('\n').map(line => 
-                        `<div class="lyrics-line">${line}</div>`
-                    ).join('');
+                    formattedLyrics += sections[i].split('\n').map(line => {
+                        // Add space after punctuation marks
+                        line = line.replace(/([.!?])(\S)/g, '$1 $2');
+                        return `<div class="lyrics-line">${line}</div>`;
+                    }).join('');
                     formattedLyrics += `</div>`;
                 }
             }
